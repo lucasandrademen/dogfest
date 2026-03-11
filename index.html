@@ -21,6 +21,7 @@
       --green:  #22c55e;
       --green2: #16a34a;
       --red:    #ef4444;
+      --yellow: #eab308;
       --r:      12px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -93,9 +94,10 @@
     }
     .sum-label { font-size: 10px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
     .sum-val { font-size: 18px; font-weight: 700; margin-top: 2px; }
-    .sum-val.green { color: var(--green); }
-    .sum-val.red   { color: var(--red); }
-    .sum-val.white { color: var(--white); }
+    .sum-val.green  { color: var(--green); }
+    .sum-val.red    { color: var(--red); }
+    .sum-val.white  { color: var(--white); }
+    .sum-val.yellow { color: var(--yellow); }
 
     /* Tabs */
     .tabs {
@@ -104,7 +106,7 @@
     }
     .tab-btn {
       flex: 1; padding: 12px 4px; background: none; border: none; color: var(--gray);
-      font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
       cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s;
     }
     .tab-btn.active { color: var(--white); border-bottom-color: var(--white); }
@@ -167,12 +169,45 @@
     .custo-edit { background: none; border: 1px solid var(--border); color: var(--gray); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all .2s; }
     .custo-edit:hover { border-color: var(--white); color: var(--white); }
 
-    .add-custo-btn {
+    .add-btn {
       width: 100%; padding: 14px; background: none; border: 1px dashed var(--border);
       color: var(--gray); border-radius: var(--r); cursor: pointer; font-size: 14px;
       margin-top: 10px; transition: all .2s;
     }
-    .add-custo-btn:hover { border-color: var(--white); color: var(--white); }
+    .add-btn:hover { border-color: var(--white); color: var(--white); }
+
+    /* Comprovantes tab */
+    .comprov-list { display: flex; flex-direction: column; gap: 10px; }
+    .comprov-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .comprov-card.ok-comprov { border-color: var(--green); background: #0a1f0a; }
+    .comprov-info { flex: 1; }
+    .comprov-nome { font-size: 15px; font-weight: 600; }
+    .comprov-obs  { font-size: 12px; color: var(--gray); margin-top: 2px; }
+    .comprov-val  { font-size: 18px; font-weight: 700; color: var(--green); }
+    .comprov-edit { background: none; border: 1px solid var(--border); color: var(--gray); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all .2s; }
+    .comprov-edit:hover { border-color: var(--white); color: var(--white); }
+    .comprov-date { font-size: 11px; color: var(--gray2); margin-top: 2px; }
+
+    /* Balanço banner */
+    .balanco-banner {
+      border-radius: var(--r); padding: 14px 16px; margin-bottom: 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      border: 1px solid var(--border);
+    }
+    .balanco-banner.ok    { border-color: var(--green); background: #0a1f0a; }
+    .balanco-banner.warn  { border-color: var(--yellow); background: #1a1500; }
+    .balanco-banner .bl-label { font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
+    .balanco-banner .bl-val   { font-size: 20px; font-weight: 800; margin-top: 2px; }
+    .balanco-banner .bl-val.green  { color: var(--green); }
+    .balanco-banner .bl-val.yellow { color: var(--yellow); }
+    .balanco-banner .bl-val.red    { color: var(--red); }
+    .balanco-totais { display: flex; gap: 8px; }
+    .balanco-totais .bt-item { text-align: center; background: var(--bg3); border-radius: 8px; padding: 8px 14px; }
+    .balanco-totais .bt-num  { font-size: 18px; font-weight: 700; }
+    .balanco-totais .bt-lbl  { font-size: 10px; color: var(--gray); text-transform: uppercase; }
 
     /* Resumo tab */
     .resumo-grid { display: flex; flex-direction: column; gap: 14px; }
@@ -182,8 +217,9 @@
     }
     .resumo-label { font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
     .resumo-val { font-size: 32px; font-weight: 800; }
-    .resumo-val.green { color: var(--green); }
-    .resumo-val.red   { color: var(--red); }
+    .resumo-val.green  { color: var(--green); }
+    .resumo-val.red    { color: var(--red); }
+    .resumo-val.yellow { color: var(--yellow); }
     .resumo-sub { font-size: 13px; color: var(--gray); margin-top: 4px; }
     .divider { height: 1px; background: var(--border); margin: 4px 0; }
     .resumo-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
@@ -233,7 +269,6 @@
     .toast.show { transform: translateX(-50%) translateY(0); }
     .toast.green-toast { background: var(--green); color: #fff; }
 
-    /* Paw decoration */
     .paw-divider { text-align: center; color: var(--border); font-size: 18px; letter-spacing: 6px; padding: 4px 0; }
   </style>
 </head>
@@ -281,6 +316,7 @@
   <div class="tabs">
     <button class="tab-btn active" data-tab="lista">Lista (0)</button>
     <button class="tab-btn" data-tab="custos">Custos</button>
+    <button class="tab-btn" data-tab="comprovantes">Comprov.</button>
     <button class="tab-btn" data-tab="resumo">Resumo</button>
   </div>
 
@@ -306,7 +342,16 @@
     <div class="custo-list" id="custoList">
       <div class="loading"><div class="spinner"></div>Carregando custos...</div>
     </div>
-    <button class="add-custo-btn" id="btnAddCusto">+ Adicionar Custo</button>
+    <button class="add-btn" id="btnAddCusto">+ Adicionar Custo</button>
+  </div>
+
+  <!-- COMPROVANTES tab -->
+  <div class="tab-content" id="tab-comprovantes">
+    <div id="balancoBanner"></div>
+    <div class="comprov-list" id="comprovList">
+      <div class="loading"><div class="spinner"></div>Carregando comprovantes...</div>
+    </div>
+    <button class="add-btn" id="btnAddComprov">+ Adicionar Comprovante</button>
   </div>
 
   <!-- RESUMO tab -->
@@ -341,6 +386,30 @@
   </div>
 </div>
 
+<!-- Modal Comprovante -->
+<div class="modal-overlay" id="modalComprov">
+  <div class="modal">
+    <div class="modal-title" id="modalComprovTitle">Adicionar Comprovante</div>
+    <div class="form-group">
+      <label class="form-label">Nome / Referência</label>
+      <input type="text" class="form-input" id="comprovNomeInput" placeholder="Ex: João Silva"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Valor (R$)</label>
+      <input type="number" class="form-input" id="comprovValInput" placeholder="50" min="0" value="50"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observação (PIX, cheque, etc.)</label>
+      <input type="text" class="form-input" id="comprovObsInput" placeholder="Ex: PIX 12:34 · R$ 50"/>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-del" id="btnDelComprov" style="display:none">🗑</button>
+      <button class="btn-cancel" id="btnCancelComprov">Cancelar</button>
+      <button class="btn-save" id="btnSaveComprov">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -351,15 +420,17 @@ const SENHA = 'dogfest2025';
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ── Estado ─────────────────────────────────────── */
-let convidados = [];
-let custos = [];
+let convidados   = [];
+let custos       = [];
+let comprovantes = [];
 let filtro = 'todos';
-let busca = '';
-let editCustoId = null;
+let busca  = '';
+let editCustoId   = null;
+let editComprovId = null;
 
 /* ── Auth ────────────────────────────────────────── */
-const splash = document.getElementById('splash');
-const app    = document.getElementById('app');
+const splash   = document.getElementById('splash');
+const app      = document.getElementById('app');
 const pinInput = document.getElementById('pinInput');
 const btnEnter = document.getElementById('btnEnter');
 const errMsg   = document.getElementById('errMsg');
@@ -417,7 +488,7 @@ document.getElementById('searchInput').addEventListener('input', e => {
 
 /* ── Load ────────────────────────────────────────── */
 async function loadAll() {
-  await Promise.all([loadConvidados(), loadCustos()]);
+  await Promise.all([loadConvidados(), loadCustos(), loadComprovantes()]);
 }
 
 async function loadConvidados() {
@@ -437,20 +508,27 @@ async function loadCustos() {
   updateSummary();
 }
 
+async function loadComprovantes() {
+  const { data, error } = await db.from('comprovantes').select('*').order('created_at', { ascending: false });
+  if (error) { showToast('Erro ao carregar comprovantes', false); return; }
+  comprovantes = data;
+  renderComprovantes();
+}
+
 /* ── Render Guests ───────────────────────────────── */
 function getFiltered() {
   return convidados.filter(g => {
-    const matchBusca = g.nome.toLowerCase().includes(busca);
+    const matchBusca  = g.nome.toLowerCase().includes(busca);
     const matchFiltro = filtro === 'todos' ? true : filtro === 'pagos' ? g.confirmado : !g.confirmado;
     return matchBusca && matchFiltro;
   });
 }
 
 function renderGuests() {
-  const list = document.getElementById('guestList');
-  const info = document.getElementById('countInfo');
+  const list     = document.getElementById('guestList');
+  const info     = document.getElementById('countInfo');
   const filtered = getFiltered();
-  const pagos = convidados.filter(g => g.confirmado).length;
+  const pagos    = convidados.filter(g => g.confirmado).length;
 
   info.textContent = `${filtered.length} exibindo · ${pagos}/${convidados.length} pagos`;
 
@@ -473,7 +551,6 @@ function renderGuests() {
 }
 
 function updateTabCount() {
-  const pagos = convidados.filter(g => g.confirmado).length;
   document.querySelector('[data-tab="lista"]').textContent = `Lista (${convidados.length})`;
 }
 
@@ -502,15 +579,14 @@ async function togglePagamento(id, atual) {
 function updateSummary() {
   const arrecadado = convidados.filter(g => g.confirmado).length * 50;
   const custoTotal = custos.reduce((acc, c) => acc + Number(c.valor), 0);
-  const saldo = arrecadado - custoTotal;
+  const saldo      = arrecadado - custoTotal;
 
   document.getElementById('sumArrecadado').textContent = `R$ ${arrecadado.toLocaleString('pt-BR')}`;
-  document.getElementById('sumCusto').textContent = `R$ ${custoTotal.toLocaleString('pt-BR')}`;
+  document.getElementById('sumCusto').textContent      = `R$ ${custoTotal.toLocaleString('pt-BR')}`;
 
   const saldoEl = document.getElementById('sumSaldo');
-  saldoEl.textContent = `R$ ${Math.abs(saldo).toLocaleString('pt-BR')}`;
   saldoEl.className = 'sum-val ' + (saldo >= 0 ? 'green' : 'red');
-  if (saldo < 0) saldoEl.textContent = '-R$ ' + Math.abs(saldo).toLocaleString('pt-BR');
+  saldoEl.textContent = (saldo < 0 ? '-' : '') + 'R$ ' + Math.abs(saldo).toLocaleString('pt-BR');
 }
 
 /* ── Render Custos ───────────────────────────────── */
@@ -534,7 +610,7 @@ function renderCustos() {
 
 /* ── Modal Custo ─────────────────────────────────── */
 document.getElementById('btnAddCusto').addEventListener('click', () => openAddCusto());
-document.getElementById('btnCancelCusto').addEventListener('click', closeModal);
+document.getElementById('btnCancelCusto').addEventListener('click', closeModalCusto);
 document.getElementById('btnSaveCusto').addEventListener('click', saveCusto);
 document.getElementById('btnDelCusto').addEventListener('click', delCusto);
 
@@ -543,7 +619,7 @@ function openAddCusto() {
   document.getElementById('modalCustoTitle').textContent = 'Adicionar Custo';
   document.getElementById('custoItemInput').value = '';
   document.getElementById('custoDescInput').value = '';
-  document.getElementById('custoValInput').value = '';
+  document.getElementById('custoValInput').value  = '';
   document.getElementById('btnDelCusto').style.display = 'none';
   document.getElementById('modalCusto').classList.add('open');
 }
@@ -555,19 +631,19 @@ function openEditCusto(id) {
   document.getElementById('modalCustoTitle').textContent = 'Editar Custo';
   document.getElementById('custoItemInput').value = c.item;
   document.getElementById('custoDescInput').value = c.descricao || '';
-  document.getElementById('custoValInput').value = c.valor;
+  document.getElementById('custoValInput').value  = c.valor;
   document.getElementById('btnDelCusto').style.display = 'block';
   document.getElementById('modalCusto').classList.add('open');
 }
 
-function closeModal() {
+function closeModalCusto() {
   document.getElementById('modalCusto').classList.remove('open');
 }
 
 async function saveCusto() {
-  const item = document.getElementById('custoItemInput').value.trim().toUpperCase();
+  const item     = document.getElementById('custoItemInput').value.trim().toUpperCase();
   const descricao = document.getElementById('custoDescInput').value.trim();
-  const valor = parseFloat(document.getElementById('custoValInput').value) || 0;
+  const valor    = parseFloat(document.getElementById('custoValInput').value) || 0;
   if (!item) { showToast('Preencha o nome do item', false); return; }
 
   const btn = document.getElementById('btnSaveCusto');
@@ -581,7 +657,7 @@ async function saveCusto() {
   }
   btn.textContent = 'Salvar'; btn.disabled = false;
   if (error) { showToast('Erro ao salvar', false); return; }
-  closeModal();
+  closeModalCusto();
   await loadCustos();
   showToast('Custo salvo!', true);
   renderResumo();
@@ -592,26 +668,176 @@ async function delCusto() {
   if (!confirm('Excluir este custo?')) return;
   const { error } = await db.from('custos').delete().eq('id', editCustoId);
   if (error) { showToast('Erro ao excluir', false); return; }
-  closeModal();
+  closeModalCusto();
   await loadCustos();
   showToast('Custo removido', true);
   renderResumo();
 }
 
+document.getElementById('modalCusto').addEventListener('click', function(e) {
+  if (e.target === this) closeModalCusto();
+});
+
+/* ── Render Comprovantes ─────────────────────────── */
+function renderComprovantes() {
+  const list = document.getElementById('comprovList');
+  const totalComprov = comprovantes.reduce((a, c) => a + Number(c.valor), 0);
+  const totalConfirm = convidados.filter(g => g.confirmado).length * 50;
+  const diff = totalComprov - totalConfirm;
+
+  // Banner de balanço
+  const banner = document.getElementById('balancoBanner');
+  let cls = diff === 0 ? 'ok' : 'warn';
+  let diffLabel = diff === 0
+    ? '✓ Comprovantes batem com confirmados'
+    : diff > 0
+      ? `⚠ R$ ${diff.toLocaleString('pt-BR')} a mais nos comprovantes`
+      : `⚠ R$ ${Math.abs(diff).toLocaleString('pt-BR')} a menos nos comprovantes`;
+  let valCls = diff === 0 ? 'green' : diff > 0 ? 'yellow' : 'red';
+
+  banner.innerHTML = `
+    <div class="balanco-banner ${cls}">
+      <div>
+        <div class="bl-label">Balanço</div>
+        <div class="bl-val ${valCls}">${diffLabel}</div>
+      </div>
+    </div>
+    <div class="balanco-totais" style="margin-bottom:14px">
+      <div class="bt-item" style="flex:1">
+        <div class="bt-num" style="color:var(--green)">R$ ${totalComprov.toLocaleString('pt-BR')}</div>
+        <div class="bt-lbl">Comprovantes</div>
+      </div>
+      <div class="bt-item" style="flex:1">
+        <div class="bt-num" style="color:var(--white)">R$ ${totalConfirm.toLocaleString('pt-BR')}</div>
+        <div class="bt-lbl">Confirmados (OK)</div>
+      </div>
+      <div class="bt-item" style="flex:1">
+        <div class="bt-num">${comprovantes.length}</div>
+        <div class="bt-lbl">Registros</div>
+      </div>
+    </div>
+  `;
+
+  if (comprovantes.length === 0) {
+    list.innerHTML = '<div class="loading" style="color:var(--gray)">Nenhum comprovante registrado</div>';
+    return;
+  }
+
+  list.innerHTML = comprovantes.map(c => {
+    const d = new Date(c.created_at);
+    const dataStr = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return `
+      <div class="comprov-card">
+        <div class="comprov-info">
+          <div class="comprov-nome">${c.nome}</div>
+          ${c.observacao ? `<div class="comprov-obs">${c.observacao}</div>` : ''}
+          <div class="comprov-date">${dataStr}</div>
+        </div>
+        <div class="comprov-val">R$ ${Number(c.valor).toLocaleString('pt-BR')}</div>
+        <button class="comprov-edit" onclick="openEditComprov('${c.id}')">✏️</button>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ── Modal Comprovante ───────────────────────────── */
+document.getElementById('btnAddComprov').addEventListener('click', () => openAddComprov());
+document.getElementById('btnCancelComprov').addEventListener('click', closeModalComprov);
+document.getElementById('btnSaveComprov').addEventListener('click', saveComprov);
+document.getElementById('btnDelComprov').addEventListener('click', delComprov);
+
+function openAddComprov() {
+  editComprovId = null;
+  document.getElementById('modalComprovTitle').textContent = 'Adicionar Comprovante';
+  document.getElementById('comprovNomeInput').value = '';
+  document.getElementById('comprovValInput').value  = '50';
+  document.getElementById('comprovObsInput').value  = '';
+  document.getElementById('btnDelComprov').style.display = 'none';
+  document.getElementById('modalComprov').classList.add('open');
+}
+
+function openEditComprov(id) {
+  const c = comprovantes.find(x => x.id === id);
+  if (!c) return;
+  editComprovId = id;
+  document.getElementById('modalComprovTitle').textContent = 'Editar Comprovante';
+  document.getElementById('comprovNomeInput').value = c.nome;
+  document.getElementById('comprovValInput').value  = c.valor;
+  document.getElementById('comprovObsInput').value  = c.observacao || '';
+  document.getElementById('btnDelComprov').style.display = 'block';
+  document.getElementById('modalComprov').classList.add('open');
+}
+
+function closeModalComprov() {
+  document.getElementById('modalComprov').classList.remove('open');
+}
+
+async function saveComprov() {
+  const nome      = document.getElementById('comprovNomeInput').value.trim();
+  const valor     = parseFloat(document.getElementById('comprovValInput').value) || 50;
+  const observacao = document.getElementById('comprovObsInput').value.trim();
+  if (!nome) { showToast('Preencha o nome/referência', false); return; }
+
+  const btn = document.getElementById('btnSaveComprov');
+  btn.textContent = 'Salvando...'; btn.disabled = true;
+
+  let error;
+  if (editComprovId) {
+    ({ error } = await db.from('comprovantes').update({ nome, valor, observacao }).eq('id', editComprovId));
+  } else {
+    ({ error } = await db.from('comprovantes').insert({ nome, valor, observacao }));
+  }
+  btn.textContent = 'Salvar'; btn.disabled = false;
+  if (error) { showToast('Erro ao salvar', false); return; }
+  closeModalComprov();
+  await loadComprovantes();
+  showToast('Comprovante salvo!', true);
+  renderResumo();
+}
+
+async function delComprov() {
+  if (!editComprovId) return;
+  if (!confirm('Excluir este comprovante?')) return;
+  const { error } = await db.from('comprovantes').delete().eq('id', editComprovId);
+  if (error) { showToast('Erro ao excluir', false); return; }
+  closeModalComprov();
+  await loadComprovantes();
+  showToast('Comprovante removido', true);
+  renderResumo();
+}
+
+document.getElementById('modalComprov').addEventListener('click', function(e) {
+  if (e.target === this) closeModalComprov();
+});
+
 /* ── Resumo ──────────────────────────────────────── */
 function renderResumo() {
-  const grid = document.getElementById('resumoGrid');
-  const pagos = convidados.filter(g => g.confirmado).length;
-  const arrecadado = pagos * 50;
-  const custoTotal = custos.reduce((acc, c) => acc + Number(c.valor), 0);
-  const saldo = arrecadado - custoTotal;
-  const potencial = convidados.length * 50;
+  const grid         = document.getElementById('resumoGrid');
+  const pagos        = convidados.filter(g => g.confirmado).length;
+  const arrecadado   = pagos * 50;
+  const custoTotal   = custos.reduce((acc, c) => acc + Number(c.valor), 0);
+  const saldo        = arrecadado - custoTotal;
+  const potencial    = convidados.length * 50;
+  const totalComprov = comprovantes.reduce((a, c) => a + Number(c.valor), 0);
+  const diffComprov  = totalComprov - arrecadado;
 
   grid.innerHTML = `
     <div class="resumo-card">
-      <div class="resumo-label">Arrecadado</div>
+      <div class="resumo-label">Arrecadado (OK)</div>
       <div class="resumo-val green">R$ ${arrecadado.toLocaleString('pt-BR')}</div>
       <div class="resumo-sub">${pagos} convidado${pagos !== 1 ? 's' : ''} pagaram R$ 50 cada</div>
+    </div>
+
+    <div class="resumo-card">
+      <div class="resumo-label">Comprovantes Registrados</div>
+      <div class="resumo-val ${diffComprov === 0 ? 'green' : diffComprov > 0 ? 'yellow' : 'red'}">R$ ${totalComprov.toLocaleString('pt-BR')}</div>
+      <div class="resumo-sub">
+        ${diffComprov === 0
+          ? '✓ Bate com os confirmados'
+          : diffComprov > 0
+            ? `⚠ R$ ${diffComprov.toLocaleString('pt-BR')} a mais que os confirmados`
+            : `⚠ R$ ${Math.abs(diffComprov).toLocaleString('pt-BR')} a menos que os confirmados`}
+      </div>
     </div>
 
     <div class="resumo-card">
@@ -653,11 +879,6 @@ function showToast(msg, ok = true) {
   t.className = 'toast show' + (ok ? ' green-toast' : '');
   setTimeout(() => { t.classList.remove('show'); }, 2500);
 }
-
-/* ── Fechar modal clicando fora ──────────────────── */
-document.getElementById('modalCusto').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
 </script>
 </body>
 </html>
