@@ -177,37 +177,27 @@
     .add-btn:hover { border-color: var(--white); color: var(--white); }
 
     /* Comprovantes tab */
+    .upload-area {
+      border: 2px dashed var(--border); border-radius: var(--r);
+      padding: 40px 20px; text-align: center; cursor: pointer;
+      transition: all .2s; margin-bottom: 16px; background: var(--bg2);
+    }
+    .upload-area:hover, .upload-area.drag { border-color: var(--white); background: var(--bg3); }
+    .upload-icon { font-size: 48px; margin-bottom: 10px; }
+    .upload-text { color: var(--gray); font-size: 14px; }
+    .upload-progress { display: none; text-align: center; padding: 16px; color: var(--gray); font-size: 14px; }
     .comprov-list { display: flex; flex-direction: column; gap: 10px; }
     .comprov-card {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
       padding: 14px 16px; display: flex; align-items: center; gap: 12px;
     }
-    .comprov-card.ok-comprov { border-color: var(--green); background: #0a1f0a; }
-    .comprov-info { flex: 1; }
-    .comprov-nome { font-size: 15px; font-weight: 600; }
-    .comprov-obs  { font-size: 12px; color: var(--gray); margin-top: 2px; }
-    .comprov-val  { font-size: 18px; font-weight: 700; color: var(--green); }
-    .comprov-edit { background: none; border: 1px solid var(--border); color: var(--gray); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all .2s; }
-    .comprov-edit:hover { border-color: var(--white); color: var(--white); }
+    .comprov-info { flex: 1; min-width: 0; }
+    .comprov-nome { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .comprov-date { font-size: 11px; color: var(--gray2); margin-top: 2px; }
-
-    /* Balanço banner */
-    .balanco-banner {
-      border-radius: var(--r); padding: 14px 16px; margin-bottom: 14px;
-      display: flex; justify-content: space-between; align-items: center;
-      border: 1px solid var(--border);
-    }
-    .balanco-banner.ok    { border-color: var(--green); background: #0a1f0a; }
-    .balanco-banner.warn  { border-color: var(--yellow); background: #1a1500; }
-    .balanco-banner .bl-label { font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
-    .balanco-banner .bl-val   { font-size: 20px; font-weight: 800; margin-top: 2px; }
-    .balanco-banner .bl-val.green  { color: var(--green); }
-    .balanco-banner .bl-val.yellow { color: var(--yellow); }
-    .balanco-banner .bl-val.red    { color: var(--red); }
-    .balanco-totais { display: flex; gap: 8px; }
-    .balanco-totais .bt-item { text-align: center; background: var(--bg3); border-radius: 8px; padding: 8px 14px; }
-    .balanco-totais .bt-num  { font-size: 18px; font-weight: 700; }
-    .balanco-totais .bt-lbl  { font-size: 10px; color: var(--gray); text-transform: uppercase; }
+    .comprov-view { background: none; border: 1px solid var(--border); color: var(--gray); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all .2s; text-decoration: none; display: inline-block; }
+    .comprov-view:hover { border-color: var(--white); color: var(--white); }
+    .comprov-del { background: none; border: 1px solid var(--red); color: var(--red); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all .2s; }
+    .comprov-del:hover { background: var(--red); color: #fff; }
 
     /* Resumo tab */
     .resumo-grid { display: flex; flex-direction: column; gap: 14px; }
@@ -347,11 +337,17 @@
 
   <!-- COMPROVANTES tab -->
   <div class="tab-content" id="tab-comprovantes">
-    <div id="balancoBanner"></div>
-    <div class="comprov-list" id="comprovList">
-      <div class="loading"><div class="spinner"></div>Carregando comprovantes...</div>
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">📄</div>
+      <div class="upload-text">Toque ou arraste para enviar comprovante (PDF)</div>
+      <input type="file" id="pdfInput" accept="application/pdf,.pdf" style="display:none" multiple/>
     </div>
-    <button class="add-btn" id="btnAddComprov">+ Adicionar Comprovante</button>
+    <div class="upload-progress" id="uploadProgress">
+      <div class="spinner" style="margin:0 auto 8px"></div>Enviando...
+    </div>
+    <div class="comprov-list" id="comprovList">
+      <div class="loading"><div class="spinner"></div>Carregando...</div>
+    </div>
   </div>
 
   <!-- RESUMO tab -->
@@ -386,30 +382,6 @@
   </div>
 </div>
 
-<!-- Modal Comprovante -->
-<div class="modal-overlay" id="modalComprov">
-  <div class="modal">
-    <div class="modal-title" id="modalComprovTitle">Adicionar Comprovante</div>
-    <div class="form-group">
-      <label class="form-label">Nome / Referência</label>
-      <input type="text" class="form-input" id="comprovNomeInput" placeholder="Ex: João Silva"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Valor (R$)</label>
-      <input type="number" class="form-input" id="comprovValInput" placeholder="50" min="0" value="50"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Observação (PIX, cheque, etc.)</label>
-      <input type="text" class="form-input" id="comprovObsInput" placeholder="Ex: PIX 12:34 · R$ 50"/>
-    </div>
-    <div class="modal-btns">
-      <button class="btn-del" id="btnDelComprov" style="display:none">🗑</button>
-      <button class="btn-cancel" id="btnCancelComprov">Cancelar</button>
-      <button class="btn-save" id="btnSaveComprov">Salvar</button>
-    </div>
-  </div>
-</div>
-
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -422,11 +394,9 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 /* ── Estado ─────────────────────────────────────── */
 let convidados   = [];
 let custos       = [];
-let comprovantes = [];
 let filtro = 'todos';
 let busca  = '';
-let editCustoId   = null;
-let editComprovId = null;
+let editCustoId = null;
 
 /* ── Auth ────────────────────────────────────────── */
 const splash   = document.getElementById('splash');
@@ -488,7 +458,8 @@ document.getElementById('searchInput').addEventListener('input', e => {
 
 /* ── Load ────────────────────────────────────────── */
 async function loadAll() {
-  await Promise.all([loadConvidados(), loadCustos(), loadComprovantes()]);
+  await Promise.all([loadConvidados(), loadCustos()]);
+  loadComprovantes();
 }
 
 async function loadConvidados() {
@@ -509,10 +480,8 @@ async function loadCustos() {
 }
 
 async function loadComprovantes() {
-  const { data, error } = await db.from('comprovantes').select('*').order('created_at', { ascending: false });
-  if (error) { showToast('Erro ao carregar comprovantes', false); return; }
-  comprovantes = data;
-  renderComprovantes();
+  const { data, error } = await db.storage.from('comprovantes').list('', { sortBy: { column: 'created_at', order: 'desc' } });
+  renderComprovantes(error ? [] : (data || []));
 }
 
 /* ── Render Guests ───────────────────────────────── */
@@ -678,137 +647,69 @@ document.getElementById('modalCusto').addEventListener('click', function(e) {
   if (e.target === this) closeModalCusto();
 });
 
-/* ── Render Comprovantes ─────────────────────────── */
-function renderComprovantes() {
+/* ── Comprovantes (Storage) ──────────────────────── */
+const uploadArea    = document.getElementById('uploadArea');
+const pdfInput      = document.getElementById('pdfInput');
+const uploadProgress = document.getElementById('uploadProgress');
+
+uploadArea.addEventListener('click', () => pdfInput.click());
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag'));
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault(); uploadArea.classList.remove('drag');
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+  if (files.length) uploadFiles(files);
+});
+pdfInput.addEventListener('change', () => {
+  const files = Array.from(pdfInput.files);
+  if (files.length) { uploadFiles(files); pdfInput.value = ''; }
+});
+
+async function uploadFiles(files) {
+  uploadArea.style.display = 'none';
+  uploadProgress.style.display = 'block';
+  for (const file of files) {
+    const name = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const { error } = await db.storage.from('comprovantes').upload(name, file, { contentType: 'application/pdf' });
+    if (error) showToast('Erro ao enviar: ' + file.name, false);
+    else showToast('✓ ' + file.name + ' enviado!', true);
+  }
+  uploadProgress.style.display = 'none';
+  uploadArea.style.display = 'block';
+  loadComprovantes();
+}
+
+function renderComprovantes(files) {
   const list = document.getElementById('comprovList');
-  const totalComprov = comprovantes.reduce((a, c) => a + Number(c.valor), 0);
-  const totalConfirm = convidados.filter(g => g.confirmado).length * 50;
-  const diff = totalComprov - totalConfirm;
-
-  // Banner de balanço
-  const banner = document.getElementById('balancoBanner');
-  let cls = diff === 0 ? 'ok' : 'warn';
-  let diffLabel = diff === 0
-    ? '✓ Comprovantes batem com confirmados'
-    : diff > 0
-      ? `⚠ R$ ${diff.toLocaleString('pt-BR')} a mais nos comprovantes`
-      : `⚠ R$ ${Math.abs(diff).toLocaleString('pt-BR')} a menos nos comprovantes`;
-  let valCls = diff === 0 ? 'green' : diff > 0 ? 'yellow' : 'red';
-
-  banner.innerHTML = `
-    <div class="balanco-banner ${cls}">
-      <div>
-        <div class="bl-label">Balanço</div>
-        <div class="bl-val ${valCls}">${diffLabel}</div>
-      </div>
-    </div>
-    <div class="balanco-totais" style="margin-bottom:14px">
-      <div class="bt-item" style="flex:1">
-        <div class="bt-num" style="color:var(--green)">R$ ${totalComprov.toLocaleString('pt-BR')}</div>
-        <div class="bt-lbl">Comprovantes</div>
-      </div>
-      <div class="bt-item" style="flex:1">
-        <div class="bt-num" style="color:var(--white)">R$ ${totalConfirm.toLocaleString('pt-BR')}</div>
-        <div class="bt-lbl">Confirmados (OK)</div>
-      </div>
-      <div class="bt-item" style="flex:1">
-        <div class="bt-num">${comprovantes.length}</div>
-        <div class="bt-lbl">Registros</div>
-      </div>
-    </div>
-  `;
-
-  if (comprovantes.length === 0) {
-    list.innerHTML = '<div class="loading" style="color:var(--gray)">Nenhum comprovante registrado</div>';
+  if (!files || files.length === 0) {
+    list.innerHTML = '<div class="loading" style="color:var(--gray)">Nenhum comprovante enviado</div>';
     return;
   }
-
-  list.innerHTML = comprovantes.map(c => {
-    const d = new Date(c.created_at);
-    const dataStr = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  list.innerHTML = files.map(f => {
+    const { data } = db.storage.from('comprovantes').getPublicUrl(f.name);
+    const url = data.publicUrl;
+    const dateStr = f.created_at ? new Date(f.created_at).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+    const displayName = f.name.replace(/^\d+_/, '');
     return `
       <div class="comprov-card">
         <div class="comprov-info">
-          <div class="comprov-nome">${c.nome}</div>
-          ${c.observacao ? `<div class="comprov-obs">${c.observacao}</div>` : ''}
-          <div class="comprov-date">${dataStr}</div>
+          <div class="comprov-nome">${displayName}</div>
+          ${dateStr ? `<div class="comprov-date">${dateStr}</div>` : ''}
         </div>
-        <div class="comprov-val">R$ ${Number(c.valor).toLocaleString('pt-BR')}</div>
-        <button class="comprov-edit" onclick="openEditComprov('${c.id}')">✏️</button>
+        <a class="comprov-view" href="${url}" target="_blank">👁 Ver</a>
+        <button class="comprov-del" onclick="delComprovante('${f.name}')">🗑</button>
       </div>
     `;
   }).join('');
 }
 
-/* ── Modal Comprovante ───────────────────────────── */
-document.getElementById('btnAddComprov').addEventListener('click', () => openAddComprov());
-document.getElementById('btnCancelComprov').addEventListener('click', closeModalComprov);
-document.getElementById('btnSaveComprov').addEventListener('click', saveComprov);
-document.getElementById('btnDelComprov').addEventListener('click', delComprov);
-
-function openAddComprov() {
-  editComprovId = null;
-  document.getElementById('modalComprovTitle').textContent = 'Adicionar Comprovante';
-  document.getElementById('comprovNomeInput').value = '';
-  document.getElementById('comprovValInput').value  = '50';
-  document.getElementById('comprovObsInput').value  = '';
-  document.getElementById('btnDelComprov').style.display = 'none';
-  document.getElementById('modalComprov').classList.add('open');
-}
-
-function openEditComprov(id) {
-  const c = comprovantes.find(x => x.id === id);
-  if (!c) return;
-  editComprovId = id;
-  document.getElementById('modalComprovTitle').textContent = 'Editar Comprovante';
-  document.getElementById('comprovNomeInput').value = c.nome;
-  document.getElementById('comprovValInput').value  = c.valor;
-  document.getElementById('comprovObsInput').value  = c.observacao || '';
-  document.getElementById('btnDelComprov').style.display = 'block';
-  document.getElementById('modalComprov').classList.add('open');
-}
-
-function closeModalComprov() {
-  document.getElementById('modalComprov').classList.remove('open');
-}
-
-async function saveComprov() {
-  const nome      = document.getElementById('comprovNomeInput').value.trim();
-  const valor     = parseFloat(document.getElementById('comprovValInput').value) || 50;
-  const observacao = document.getElementById('comprovObsInput').value.trim();
-  if (!nome) { showToast('Preencha o nome/referência', false); return; }
-
-  const btn = document.getElementById('btnSaveComprov');
-  btn.textContent = 'Salvando...'; btn.disabled = true;
-
-  let error;
-  if (editComprovId) {
-    ({ error } = await db.from('comprovantes').update({ nome, valor, observacao }).eq('id', editComprovId));
-  } else {
-    ({ error } = await db.from('comprovantes').insert({ nome, valor, observacao }));
-  }
-  btn.textContent = 'Salvar'; btn.disabled = false;
-  if (error) { showToast('Erro ao salvar', false); return; }
-  closeModalComprov();
-  await loadComprovantes();
-  showToast('Comprovante salvo!', true);
-  renderResumo();
-}
-
-async function delComprov() {
-  if (!editComprovId) return;
+async function delComprovante(name) {
   if (!confirm('Excluir este comprovante?')) return;
-  const { error } = await db.from('comprovantes').delete().eq('id', editComprovId);
+  const { error } = await db.storage.from('comprovantes').remove([name]);
   if (error) { showToast('Erro ao excluir', false); return; }
-  closeModalComprov();
-  await loadComprovantes();
-  showToast('Comprovante removido', true);
-  renderResumo();
+  showToast('Removido', true);
+  loadComprovantes();
 }
-
-document.getElementById('modalComprov').addEventListener('click', function(e) {
-  if (e.target === this) closeModalComprov();
-});
 
 /* ── Resumo ──────────────────────────────────────── */
 function renderResumo() {
@@ -818,26 +719,11 @@ function renderResumo() {
   const custoTotal   = custos.reduce((acc, c) => acc + Number(c.valor), 0);
   const saldo        = arrecadado - custoTotal;
   const potencial    = convidados.length * 50;
-  const totalComprov = comprovantes.reduce((a, c) => a + Number(c.valor), 0);
-  const diffComprov  = totalComprov - arrecadado;
-
   grid.innerHTML = `
     <div class="resumo-card">
-      <div class="resumo-label">Arrecadado (OK)</div>
+      <div class="resumo-label">Arrecadado</div>
       <div class="resumo-val green">R$ ${arrecadado.toLocaleString('pt-BR')}</div>
       <div class="resumo-sub">${pagos} convidado${pagos !== 1 ? 's' : ''} pagaram R$ 50 cada</div>
-    </div>
-
-    <div class="resumo-card">
-      <div class="resumo-label">Comprovantes Registrados</div>
-      <div class="resumo-val ${diffComprov === 0 ? 'green' : diffComprov > 0 ? 'yellow' : 'red'}">R$ ${totalComprov.toLocaleString('pt-BR')}</div>
-      <div class="resumo-sub">
-        ${diffComprov === 0
-          ? '✓ Bate com os confirmados'
-          : diffComprov > 0
-            ? `⚠ R$ ${diffComprov.toLocaleString('pt-BR')} a mais que os confirmados`
-            : `⚠ R$ ${Math.abs(diffComprov).toLocaleString('pt-BR')} a menos que os confirmados`}
-      </div>
     </div>
 
     <div class="resumo-card">
