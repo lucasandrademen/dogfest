@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="theme-color" content="#000000"/>
+  <title>DOGFEST 🐾</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    :root {
+      --bg:     #000000;
+      --bg2:    #111111;
+      --bg3:    #1a1a1a;
+      --card:   #1e1e1e;
+      --border: #333333;
+      --white:  #ffffff;
+      --gray:   #888888;
+      --gray2:  #555555;
+      --green:  #22c55e;
+      --green2: #16a34a;
+      --red:    #ef4444;
+      --r:      12px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--white); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow-x: hidden; }
+
+    /* ── SPLASH / LOGIN ─────────────────────────────── */
+    #splash {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; gap: 20px; padding: 24px;
+      background: radial-gradient(ellipse at center, #1a1a1a 0%, #000 70%);
+    }
+    .dog-art {
+      font-size: 96px; line-height: 1;
+      filter: drop-shadow(0 0 40px rgba(255,255,255,0.15));
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-12px); }
+    }
+    .splash-title {
+      font-size: 52px; font-weight: 900; letter-spacing: 8px;
+      color: var(--white); text-transform: uppercase;
+      text-shadow: 0 0 30px rgba(255,255,255,0.3);
+    }
+    .splash-sub {
+      font-size: 13px; letter-spacing: 3px; color: var(--gray);
+      text-transform: uppercase;
+    }
+    .pin-wrap { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px; margin-top: 16px; }
+    .pin-input {
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--white); font-size: 18px; padding: 14px 18px;
+      border-radius: var(--r); outline: none; text-align: center;
+      letter-spacing: 4px; width: 100%;
+      transition: border-color .2s;
+    }
+    .pin-input:focus { border-color: var(--white); }
+    .pin-input.wrong { border-color: var(--red); animation: shake .3s; }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+    .btn-enter {
+      background: var(--white); color: var(--bg); font-size: 16px; font-weight: 700;
+      padding: 14px; border: none; border-radius: var(--r); cursor: pointer;
+      letter-spacing: 2px; text-transform: uppercase; transition: opacity .2s;
+    }
+    .btn-enter:hover { opacity: .85; }
+    .err-msg { color: var(--red); font-size: 13px; text-align: center; min-height: 18px; }
+
+    /* ── APP ────────────────────────────────────────── */
+    #app { display: none; flex-direction: column; min-height: 100vh; }
+
+    /* Header */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .header-dog { font-size: 28px; }
+    .header-title { font-size: 22px; font-weight: 900; letter-spacing: 4px; flex: 1; }
+    .header-logout { background: none; border: 1px solid var(--border); color: var(--gray); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all .2s; }
+    .header-logout:hover { border-color: var(--white); color: var(--white); }
+
+    /* Summary bar */
+    .summary {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+      background: var(--border); border-bottom: 1px solid var(--border);
+    }
+    .sum-item {
+      background: var(--bg2); padding: 10px 12px; text-align: center;
+    }
+    .sum-label { font-size: 10px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
+    .sum-val { font-size: 18px; font-weight: 700; margin-top: 2px; }
+    .sum-val.green { color: var(--green); }
+    .sum-val.red   { color: var(--red); }
+    .sum-val.white { color: var(--white); }
+
+    /* Tabs */
+    .tabs {
+      display: flex; background: var(--bg); border-bottom: 1px solid var(--border);
+      position: sticky; top: 57px; z-index: 99;
+    }
+    .tab-btn {
+      flex: 1; padding: 12px 4px; background: none; border: none; color: var(--gray);
+      font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+      cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s;
+    }
+    .tab-btn.active { color: var(--white); border-bottom-color: var(--white); }
+
+    /* Content */
+    .tab-content { display: none; flex: 1; padding: 16px; }
+    .tab-content.active { display: block; }
+
+    /* Search */
+    .search-wrap { position: relative; margin-bottom: 14px; }
+    .search-input {
+      width: 100%; background: var(--card); border: 1px solid var(--border);
+      color: var(--white); font-size: 15px; padding: 10px 14px 10px 38px;
+      border-radius: var(--r); outline: none; transition: border-color .2s;
+    }
+    .search-input:focus { border-color: var(--white); }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--gray); font-size: 16px; pointer-events: none; }
+    .filter-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .filter-btn {
+      padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+      background: none; color: var(--gray); font-size: 12px; cursor: pointer;
+      transition: all .2s; white-space: nowrap;
+    }
+    .filter-btn.active { background: var(--white); color: var(--bg); border-color: var(--white); }
+
+    /* Guest cards */
+    .guest-list { display: flex; flex-direction: column; gap: 8px; }
+    .guest-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+      transition: border-color .2s, background .2s;
+    }
+    .guest-card.paid { border-color: var(--green); background: #0a1f0a; }
+    .guest-name { flex: 1; font-size: 15px; font-weight: 500; }
+    .guest-badge {
+      font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px;
+      background: var(--bg3); color: var(--gray); border: 1px solid var(--border);
+    }
+    .guest-badge.paid { background: #052e0a; color: var(--green); border-color: var(--green); }
+    .ok-btn {
+      width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--border);
+      background: none; color: var(--gray); font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s; flex-shrink: 0;
+    }
+    .ok-btn:hover { border-color: var(--green); color: var(--green); }
+    .ok-btn.done { background: var(--green); border-color: var(--green); color: #fff; }
+    .count-info { text-align: center; padding: 8px; color: var(--gray); font-size: 13px; }
+
+    /* Custos tab */
+    .custo-list { display: flex; flex-direction: column; gap: 10px; }
+    .custo-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .custo-info { flex: 1; }
+    .custo-item { font-size: 15px; font-weight: 600; }
+    .custo-desc { font-size: 12px; color: var(--gray); margin-top: 2px; }
+    .custo-val { font-size: 18px; font-weight: 700; }
+    .custo-edit { background: none; border: 1px solid var(--border); color: var(--gray); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all .2s; }
+    .custo-edit:hover { border-color: var(--white); color: var(--white); }
+
+    .add-custo-btn {
+      width: 100%; padding: 14px; background: none; border: 1px dashed var(--border);
+      color: var(--gray); border-radius: var(--r); cursor: pointer; font-size: 14px;
+      margin-top: 10px; transition: all .2s;
+    }
+    .add-custo-btn:hover { border-color: var(--white); color: var(--white); }
+
+    /* Resumo tab */
+    .resumo-grid { display: flex; flex-direction: column; gap: 14px; }
+    .resumo-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 20px;
+    }
+    .resumo-label { font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .resumo-val { font-size: 32px; font-weight: 800; }
+    .resumo-val.green { color: var(--green); }
+    .resumo-val.red   { color: var(--red); }
+    .resumo-sub { font-size: 13px; color: var(--gray); margin-top: 4px; }
+    .divider { height: 1px; background: var(--border); margin: 4px 0; }
+    .resumo-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
+    .resumo-row .lbl { color: var(--gray); }
+    .resumo-row .val { font-weight: 600; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.8);
+      z-index: 200; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 24px; width: 100%; max-width: 380px;
+    }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 12px; color: var(--gray); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 1px; }
+    .form-input {
+      width: 100%; background: var(--bg2); border: 1px solid var(--border);
+      color: var(--white); font-size: 15px; padding: 10px 14px;
+      border-radius: 8px; outline: none; transition: border-color .2s;
+    }
+    .form-input:focus { border-color: var(--white); }
+    .modal-btns { display: flex; gap: 10px; margin-top: 18px; }
+    .btn-cancel { flex: 1; padding: 12px; background: none; border: 1px solid var(--border); color: var(--gray); border-radius: 8px; cursor: pointer; font-size: 14px; transition: all .2s; }
+    .btn-cancel:hover { border-color: var(--white); color: var(--white); }
+    .btn-save { flex: 1; padding: 12px; background: var(--white); color: var(--bg); border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; transition: opacity .2s; }
+    .btn-save:hover { opacity: .85; }
+    .btn-del { padding: 12px 16px; background: none; border: 1px solid var(--red); color: var(--red); border-radius: 8px; cursor: pointer; font-size: 14px; transition: all .2s; }
+    .btn-del:hover { background: var(--red); color: #fff; }
+
+    /* Loading */
+    .loading { text-align: center; padding: 40px 20px; color: var(--gray); }
+    .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--white); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--white); color: var(--bg); padding: 10px 20px;
+      border-radius: 20px; font-size: 14px; font-weight: 600;
+      z-index: 300; transition: transform .3s;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.green-toast { background: var(--green); color: #fff; }
+
+    /* Paw decoration */
+    .paw-divider { text-align: center; color: var(--border); font-size: 18px; letter-spacing: 6px; padding: 4px 0; }
+  </style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="dog-art">🐾🐶🐾</div>
+  <div class="splash-title">DOGFEST</div>
+  <div class="splash-sub">Controle da Festa</div>
+  <div class="pin-wrap">
+    <input type="password" class="pin-input" id="pinInput" placeholder="••••••••" maxlength="20"
+      autocomplete="off" spellcheck="false"/>
+    <button class="btn-enter" id="btnEnter">ENTRAR</button>
+    <div class="err-msg" id="errMsg"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- Header -->
+  <div class="header">
+    <span class="header-dog">🐶</span>
+    <span class="header-title">DOGFEST</span>
+    <button class="header-logout" id="btnLogout">SAIR</button>
+  </div>
+
+  <!-- Summary bar -->
+  <div class="summary">
+    <div class="sum-item">
+      <div class="sum-label">Arrecadado</div>
+      <div class="sum-val green" id="sumArrecadado">R$ 0</div>
+    </div>
+    <div class="sum-item">
+      <div class="sum-label">Custo Total</div>
+      <div class="sum-val white" id="sumCusto">R$ 0</div>
+    </div>
+    <div class="sum-item">
+      <div class="sum-label">Saldo</div>
+      <div class="sum-val" id="sumSaldo">R$ 0</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="lista">Lista (0)</button>
+    <button class="tab-btn" data-tab="custos">Custos</button>
+    <button class="tab-btn" data-tab="resumo">Resumo</button>
+  </div>
+
+  <!-- LISTA tab -->
+  <div class="tab-content active" id="tab-lista">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Buscar convidado..."/>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" data-filter="todos">Todos</button>
+      <button class="filter-btn" data-filter="pagos">Pagos ✅</button>
+      <button class="filter-btn" data-filter="pendentes">Pendentes</button>
+    </div>
+    <div class="count-info" id="countInfo"></div>
+    <div class="guest-list" id="guestList">
+      <div class="loading"><div class="spinner"></div>Carregando convidados...</div>
+    </div>
+  </div>
+
+  <!-- CUSTOS tab -->
+  <div class="tab-content" id="tab-custos">
+    <div class="custo-list" id="custoList">
+      <div class="loading"><div class="spinner"></div>Carregando custos...</div>
+    </div>
+    <button class="add-custo-btn" id="btnAddCusto">+ Adicionar Custo</button>
+  </div>
+
+  <!-- RESUMO tab -->
+  <div class="tab-content" id="tab-resumo">
+    <div class="resumo-grid" id="resumoGrid">
+      <div class="loading"><div class="spinner"></div>Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Custo -->
+<div class="modal-overlay" id="modalCusto">
+  <div class="modal">
+    <div class="modal-title" id="modalCustoTitle">Adicionar Custo</div>
+    <div class="form-group">
+      <label class="form-label">Item</label>
+      <input type="text" class="form-input" id="custoItemInput" placeholder="Ex: BUFFET"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrição</label>
+      <input type="text" class="form-input" id="custoDescInput" placeholder="Opcional"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Valor (R$)</label>
+      <input type="number" class="form-input" id="custoValInput" placeholder="0" min="0"/>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-del" id="btnDelCusto" style="display:none">🗑</button>
+      <button class="btn-cancel" id="btnCancelCusto">Cancelar</button>
+      <button class="btn-save" id="btnSaveCusto">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://rulelhyoshcpcnjdkolb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1bGVsaHlvc2hjcGNuamRrb2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMzY5MzAsImV4cCI6MjA4ODgxMjkzMH0.rsB_nWNTVv06j63aKuuOxVwD7jN36rxvgHu0pJp0Fuw';
+const SENHA = 'dogfest2025';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ── Estado ─────────────────────────────────────── */
+let convidados = [];
+let custos = [];
+let filtro = 'todos';
+let busca = '';
+let editCustoId = null;
+
+/* ── Auth ────────────────────────────────────────── */
+const splash = document.getElementById('splash');
+const app    = document.getElementById('app');
+const pinInput = document.getElementById('pinInput');
+const btnEnter = document.getElementById('btnEnter');
+const errMsg   = document.getElementById('errMsg');
+
+function login() {
+  if (pinInput.value === SENHA) {
+    splash.style.display = 'none';
+    app.style.display = 'flex';
+    sessionStorage.setItem('df_auth', '1');
+    loadAll();
+  } else {
+    pinInput.classList.add('wrong');
+    errMsg.textContent = 'Senha incorreta';
+    setTimeout(() => { pinInput.classList.remove('wrong'); errMsg.textContent = ''; }, 800);
+    pinInput.value = '';
+  }
+}
+btnEnter.addEventListener('click', login);
+pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+document.getElementById('btnLogout').addEventListener('click', () => {
+  sessionStorage.removeItem('df_auth');
+  location.reload();
+});
+
+if (sessionStorage.getItem('df_auth')) {
+  splash.style.display = 'none';
+  app.style.display = 'flex';
+  loadAll();
+}
+
+/* ── Tabs ────────────────────────────────────────── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'resumo') renderResumo();
+  });
+});
+
+/* ── Filtros ─────────────────────────────────────── */
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filtro = btn.dataset.filter;
+    renderGuests();
+  });
+});
+document.getElementById('searchInput').addEventListener('input', e => {
+  busca = e.target.value.toLowerCase();
+  renderGuests();
+});
+
+/* ── Load ────────────────────────────────────────── */
+async function loadAll() {
+  await Promise.all([loadConvidados(), loadCustos()]);
+}
+
+async function loadConvidados() {
+  const { data, error } = await db.from('convidados').select('*').order('nome');
+  if (error) { showToast('Erro ao carregar lista', false); return; }
+  convidados = data;
+  renderGuests();
+  updateSummary();
+  updateTabCount();
+}
+
+async function loadCustos() {
+  const { data, error } = await db.from('custos').select('*').order('created_at');
+  if (error) { showToast('Erro ao carregar custos', false); return; }
+  custos = data;
+  renderCustos();
+  updateSummary();
+}
+
+/* ── Render Guests ───────────────────────────────── */
+function getFiltered() {
+  return convidados.filter(g => {
+    const matchBusca = g.nome.toLowerCase().includes(busca);
+    const matchFiltro = filtro === 'todos' ? true : filtro === 'pagos' ? g.confirmado : !g.confirmado;
+    return matchBusca && matchFiltro;
+  });
+}
+
+function renderGuests() {
+  const list = document.getElementById('guestList');
+  const info = document.getElementById('countInfo');
+  const filtered = getFiltered();
+  const pagos = convidados.filter(g => g.confirmado).length;
+
+  info.textContent = `${filtered.length} exibindo · ${pagos}/${convidados.length} pagos`;
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="loading" style="color:var(--gray)">Nenhum encontrado</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(g => `
+    <div class="guest-card ${g.confirmado ? 'paid' : ''}" id="gc-${g.id}">
+      <div class="guest-name">${g.nome}</div>
+      ${g.confirmado
+        ? `<span class="guest-badge paid">R$ 50</span>`
+        : `<span class="guest-badge">Pendente</span>`}
+      <button class="ok-btn ${g.confirmado ? 'done' : ''}" onclick="togglePagamento('${g.id}', ${g.confirmado})" title="${g.confirmado ? 'Remover pagamento' : 'Confirmar pagamento'}">
+        ${g.confirmado ? '✓' : '○'}
+      </button>
+    </div>
+  `).join('');
+}
+
+function updateTabCount() {
+  const pagos = convidados.filter(g => g.confirmado).length;
+  document.querySelector('[data-tab="lista"]').textContent = `Lista (${convidados.length})`;
+}
+
+/* ── Toggle Pagamento ────────────────────────────── */
+async function togglePagamento(id, atual) {
+  const novo = !atual;
+  const card = document.getElementById('gc-' + id);
+  if (card) card.style.opacity = '0.5';
+
+  const { error } = await db.from('convidados')
+    .update({ confirmado: novo, valor_pago: novo ? 50 : 0 })
+    .eq('id', id);
+
+  if (error) { showToast('Erro ao salvar', false); if (card) card.style.opacity = '1'; return; }
+
+  const idx = convidados.findIndex(g => g.id === id);
+  if (idx >= 0) { convidados[idx].confirmado = novo; convidados[idx].valor_pago = novo ? 50 : 0; }
+
+  renderGuests();
+  updateSummary();
+  updateTabCount();
+  showToast(novo ? '✓ Pagamento confirmado!' : 'Pagamento removido', novo);
+}
+
+/* ── Summary ─────────────────────────────────────── */
+function updateSummary() {
+  const arrecadado = convidados.filter(g => g.confirmado).length * 50;
+  const custoTotal = custos.reduce((acc, c) => acc + Number(c.valor), 0);
+  const saldo = arrecadado - custoTotal;
+
+  document.getElementById('sumArrecadado').textContent = `R$ ${arrecadado.toLocaleString('pt-BR')}`;
+  document.getElementById('sumCusto').textContent = `R$ ${custoTotal.toLocaleString('pt-BR')}`;
+
+  const saldoEl = document.getElementById('sumSaldo');
+  saldoEl.textContent = `R$ ${Math.abs(saldo).toLocaleString('pt-BR')}`;
+  saldoEl.className = 'sum-val ' + (saldo >= 0 ? 'green' : 'red');
+  if (saldo < 0) saldoEl.textContent = '-R$ ' + Math.abs(saldo).toLocaleString('pt-BR');
+}
+
+/* ── Render Custos ───────────────────────────────── */
+function renderCustos() {
+  const list = document.getElementById('custoList');
+  if (custos.length === 0) {
+    list.innerHTML = '<div class="loading" style="color:var(--gray)">Nenhum custo cadastrado</div>';
+    return;
+  }
+  list.innerHTML = custos.map(c => `
+    <div class="custo-card">
+      <div class="custo-info">
+        <div class="custo-item">${c.item}</div>
+        ${c.descricao ? `<div class="custo-desc">${c.descricao}</div>` : ''}
+      </div>
+      <div class="custo-val">R$ ${Number(c.valor).toLocaleString('pt-BR')}</div>
+      <button class="custo-edit" onclick="openEditCusto('${c.id}')">✏️</button>
+    </div>
+  `).join('');
+}
+
+/* ── Modal Custo ─────────────────────────────────── */
+document.getElementById('btnAddCusto').addEventListener('click', () => openAddCusto());
+document.getElementById('btnCancelCusto').addEventListener('click', closeModal);
+document.getElementById('btnSaveCusto').addEventListener('click', saveCusto);
+document.getElementById('btnDelCusto').addEventListener('click', delCusto);
+
+function openAddCusto() {
+  editCustoId = null;
+  document.getElementById('modalCustoTitle').textContent = 'Adicionar Custo';
+  document.getElementById('custoItemInput').value = '';
+  document.getElementById('custoDescInput').value = '';
+  document.getElementById('custoValInput').value = '';
+  document.getElementById('btnDelCusto').style.display = 'none';
+  document.getElementById('modalCusto').classList.add('open');
+}
+
+function openEditCusto(id) {
+  const c = custos.find(x => x.id === id);
+  if (!c) return;
+  editCustoId = id;
+  document.getElementById('modalCustoTitle').textContent = 'Editar Custo';
+  document.getElementById('custoItemInput').value = c.item;
+  document.getElementById('custoDescInput').value = c.descricao || '';
+  document.getElementById('custoValInput').value = c.valor;
+  document.getElementById('btnDelCusto').style.display = 'block';
+  document.getElementById('modalCusto').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalCusto').classList.remove('open');
+}
+
+async function saveCusto() {
+  const item = document.getElementById('custoItemInput').value.trim().toUpperCase();
+  const descricao = document.getElementById('custoDescInput').value.trim();
+  const valor = parseFloat(document.getElementById('custoValInput').value) || 0;
+  if (!item) { showToast('Preencha o nome do item', false); return; }
+
+  const btn = document.getElementById('btnSaveCusto');
+  btn.textContent = 'Salvando...'; btn.disabled = true;
+
+  let error;
+  if (editCustoId) {
+    ({ error } = await db.from('custos').update({ item, descricao, valor }).eq('id', editCustoId));
+  } else {
+    ({ error } = await db.from('custos').insert({ item, descricao, valor }));
+  }
+  btn.textContent = 'Salvar'; btn.disabled = false;
+  if (error) { showToast('Erro ao salvar', false); return; }
+  closeModal();
+  await loadCustos();
+  showToast('Custo salvo!', true);
+  renderResumo();
+}
+
+async function delCusto() {
+  if (!editCustoId) return;
+  if (!confirm('Excluir este custo?')) return;
+  const { error } = await db.from('custos').delete().eq('id', editCustoId);
+  if (error) { showToast('Erro ao excluir', false); return; }
+  closeModal();
+  await loadCustos();
+  showToast('Custo removido', true);
+  renderResumo();
+}
+
+/* ── Resumo ──────────────────────────────────────── */
+function renderResumo() {
+  const grid = document.getElementById('resumoGrid');
+  const pagos = convidados.filter(g => g.confirmado).length;
+  const arrecadado = pagos * 50;
+  const custoTotal = custos.reduce((acc, c) => acc + Number(c.valor), 0);
+  const saldo = arrecadado - custoTotal;
+  const potencial = convidados.length * 50;
+
+  grid.innerHTML = `
+    <div class="resumo-card">
+      <div class="resumo-label">Arrecadado</div>
+      <div class="resumo-val green">R$ ${arrecadado.toLocaleString('pt-BR')}</div>
+      <div class="resumo-sub">${pagos} convidado${pagos !== 1 ? 's' : ''} pagaram R$ 50 cada</div>
+    </div>
+
+    <div class="resumo-card">
+      <div class="resumo-label">Saldo Atual</div>
+      <div class="resumo-val ${saldo >= 0 ? 'green' : 'red'}">${saldo < 0 ? '-' : ''}R$ ${Math.abs(saldo).toLocaleString('pt-BR')}</div>
+      <div class="resumo-sub">${saldo >= 0 ? 'Lucro' : 'Prejuízo'} atual</div>
+    </div>
+
+    <div class="resumo-card">
+      <div class="resumo-label">Detalhamento de Custos</div>
+      <div class="divider" style="margin-bottom:8px"></div>
+      ${custos.map(c => `
+        <div class="resumo-row">
+          <span class="lbl">${c.item}${c.descricao ? ' · ' + c.descricao : ''}</span>
+          <span class="val">R$ ${Number(c.valor).toLocaleString('pt-BR')}</span>
+        </div>
+      `).join('<div class="divider"></div>')}
+      <div class="divider" style="margin-top:8px"></div>
+      <div class="resumo-row" style="font-weight:700">
+        <span>TOTAL</span>
+        <span>R$ ${custoTotal.toLocaleString('pt-BR')}</span>
+      </div>
+    </div>
+
+    <div class="resumo-card">
+      <div class="resumo-label">Projeção se todos pagarem</div>
+      <div class="resumo-row"><span class="lbl">Total de convidados</span><span class="val">${convidados.length}</span></div>
+      <div class="resumo-row"><span class="lbl">Potencial arrecadação</span><span class="val green">R$ ${potencial.toLocaleString('pt-BR')}</span></div>
+      <div class="resumo-row"><span class="lbl">Saldo potencial</span><span class="val ${potencial - custoTotal >= 0 ? 'green' : 'red'}">${potencial - custoTotal < 0 ? '-' : ''}R$ ${Math.abs(potencial - custoTotal).toLocaleString('pt-BR')}</span></div>
+      <div class="resumo-row"><span class="lbl">Ainda faltam pagar</span><span class="val">${convidados.length - pagos} pessoas</span></div>
+    </div>
+  `;
+}
+
+/* ── Toast ───────────────────────────────────────── */
+function showToast(msg, ok = true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (ok ? ' green-toast' : '');
+  setTimeout(() => { t.classList.remove('show'); }, 2500);
+}
+
+/* ── Fechar modal clicando fora ──────────────────── */
+document.getElementById('modalCusto').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
